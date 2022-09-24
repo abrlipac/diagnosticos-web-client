@@ -1,28 +1,54 @@
 <script>
   import axios from 'axios'
+  import Cookies from 'js-cookie'
+  import { userStore } from '../../store.js'
+
+  let errors = []
+  let correctLogin = false
 
   let user = {
     username: '',
     password: '',
   }
 
-  function iniciarSesion() {
-    var config = {
-      method: 'post',
-      url: 'http://localhost:10003/identity/auth',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        
-      },
-      }
-      data: JSON.stringify(user),
-    }
+  const handleLogin = () => {
+    iniciarSesion()
+  }
 
+  const extractUserFromToken = (accessToken) => {
+    const token = accessToken.split('.')
+    const paddedContent = token[1].padEnd(
+      token[1].length + ((token[1].length * 3) % 4),
+      '='
+    )
+    const base64Content = atob(paddedContent)
+    const parsedUser = JSON.parse(base64Content)
+    console.log(parsedUser)
+
+    return {
+      isAuth: true,
+      id: parsedUser.nameid,
+      name: parsedUser.unique_name,
+      role: parsedUser.role,
+    }
+  }
+
+  const iniciarSesion = () => {
     axios
-      .post(config)
+      .post('http://localhost:10003/identity/auth', user)
       .then((res) => {
         console.log(res)
+        if (res.status === 200 && res.data.succeeded) {
+          const accessToken = res.data.content.accessToken
+          
+          Cookies.set('AuthorizationToken', `Bearer ${accessToken}`, {
+            expires: 1 / 24,
+          })
+
+          userStore.set(extractUserFromToken(accessToken))
+        } else {
+          errors = res.data.errors
+        }
       })
       .catch((err) => {
         console.log(err)
@@ -34,9 +60,23 @@
 <h4 class="text-center">Ingrese sus datos para ingresar al sistema</h4>
 <hr class="col-md-4 mx-auto" />
 
+{#if errors.length > 0}
+  <div class="alert alert-danger">
+    {#each errors as error}
+      <p>{error}</p>
+    {/each}
+  </div>
+{/if}
+
+{#if correctLogin}
+  <div class="alert alert-success">
+    <p>Ha iniciado sesión correctamente</p>
+  </div>
+{/if}
+
 <div class="row justify-content-center">
   <div class="col-md-4">
-    <form on:submit|preventDefault={iniciarSesion}>
+    <form on:submit|preventDefault={handleLogin}>
       <div class="text-danger" />
 
       <div class="form-floating mb-3">

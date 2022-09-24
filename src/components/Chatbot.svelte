@@ -1,15 +1,23 @@
 <script>
-    import Mensaje from './Mensaje.svelte'
+  import Mensaje from './Mensaje.svelte'
+  import { onMount } from 'svelte'
 
-    const mensajes = []
-    const respuestas = []
+  let iter = -1
+  let preguntasCount = 1
+  let noHayMasPreguntas = false
+  let datoIngresado = ''
 
-    let datoIngresado = ''
+  const preguntasRespuestas = []
+  const mensajes = []
+  const respuestas = []
 
-    function agregarRespuesta(event) {
-        respuestas.push(event.detail.)
-        alert(respuestas)
-    }
+  onMount(async () => {})
+
+  function agregarRespuesta(event) {
+    respuestas.push('')
+    alert(respuestas)
+  }
+  function enterSubmit() {}
 </script>
 
 <div
@@ -20,7 +28,7 @@
   <div class="chatbot__messages py-2 flex-grow-1" style="overflow-y: scroll">
     <Mensaje
       on:message={agregarRespuesta}
-      mensaje={((contenido = 'Bienvenido!'), (esPregunta = true))} />
+      mensaje={{ contenido: 'Bienvenido!', esPregunta: true }} />
     {#each mensajes as mensaje}
       {#if mensaje.opciones.length > 0}
         <Mensaje {mensaje} alElegirOpcion="ElegirOpcionHandler" />
@@ -29,8 +37,10 @@
       {/if}
       {#if noHayMasPreguntas}
         <Mensaje
-          mensaje={((contenido = 'Muchas gracias por responder!'),
-          (esPregunta = true))} />
+          mensaje={{
+            contenido: 'Muchas gracias por responder!',
+            esPregunta: true,
+          }} />
       {/if}
     {/each}
   </div>
@@ -39,13 +49,11 @@
       class="form-control"
       placeholder="Ingrese un dato"
       bind:value={datoIngresado}
-      on:keydown={}
-
-       @onkeydown="EnterSubmit" />
+      on:keydown={enterSubmit} />
     <button
       class="chatbot__send btn btn-outline-secondary rounded-circle ms-2 d-flex align-items-center"
-      @onclick="ClickSubmit">
-      <img src="img/send.png" class="w-100" />
+      on:click={clickSubmit}>
+      <img src="img/send.png" class="w-100" alt="logo de enviar" />
     </button>
   </div>
 </div>
@@ -55,5 +63,5 @@
     type="button"
     class="btn btn-primary w-25 mx-auto"
     value="Ver resultados"
-    @onclick="GuardarDiagnostico" />
+    on:click={guardarDiagnostico} />
 {/if}

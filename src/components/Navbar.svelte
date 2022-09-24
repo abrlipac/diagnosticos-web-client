@@ -1,10 +1,9 @@
 <script>
-  let user = {
-    name: 'Abraham',
-    profile: 'img/user.png',
-    isAuth: false,
-    role: 'admin',
-  }
+  import { get } from 'svelte/store'
+  import { userStore } from '../store.js'
+
+  let currentUser = get(userStore)
+  console.log(currentUser)
 
   const opcionesPaciente = [
     {
@@ -32,9 +31,9 @@
   ]
 
   let opciones =
-    user.role === 'paciente'
+    currentUser.role === 'Paciente'
       ? opcionesPaciente
-      : user.role === 'admin'
+      : currentUser.role === 'Admin'
       ? opcionesAdmin
       : []
 </script>
@@ -59,7 +58,7 @@
       class="collapse navbar-collapse justify-content-between"
       id="navbarSupportedContent">
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-        {#if user.isAuth}
+        {#if currentUser.isAuth}
           {#each opciones as opcion}
             <li class="nav-item dropdown">
               <a
@@ -84,7 +83,7 @@
         {/if}
       </ul>
 
-      {#if user.isAuth}
+      {#if currentUser.isAuth}
         <ul class="list-unstyled ms-auto mb-2 mb-lg-0">
           <li class="nav-item dropdown">
             <a
@@ -94,9 +93,12 @@
               role="button"
               data-bs-toggle="dropdown"
               aria-expanded="false">
-              <img src={user.profile} class="logo" alt="foto de usuario" />
+              <img
+                src={currentUser.profile}
+                class="logo"
+                alt="foto de usuario" />
               <b>Bienvenido</b>
-              {user.name}
+              {currentUser.name}
               <span class="caret" />
             </a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
